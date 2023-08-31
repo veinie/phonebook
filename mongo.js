@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require('mongoose')
 
 if (process.argv.length < 3) {
@@ -7,7 +8,7 @@ if (process.argv.length < 3) {
 
 const password = process.argv[2]
 
-const url = `mongodb+srv://veinie:${password}@cluster0.lb9e8sw.mongodb.net/phonebook?retryWrites=true&w=majority`
+const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery', false)
 mongoose.connect(url)
@@ -28,7 +29,6 @@ if (process.argv.length == 5) {
     person.save().then(result => {
         console.log(`added ${person.name} ${person.number} to phonebook`)
         mongoose.connection.close()
-        process.exit(0)
     })
 }
 
@@ -39,6 +39,5 @@ if (process.argv.length == 3) {
             console.log(`${person.name} ${person.number}`)
         })
         mongoose.connection.close()
-        process.exit(1)
     })
 }
