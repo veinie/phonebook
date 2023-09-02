@@ -8,7 +8,8 @@
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "powershell -Command \"Remove-Item -Recurse -Force dist ; cd ../frontend ; npm run build ; Copy-Item dist -Recurse ../backend\"",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
+    "lint": "eslint ."
   },
   "author": "VN",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "mongoose": "^7.5.0"
   },
   "devDependencies": {
+    "eslint": "^8.48.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.1"
   }

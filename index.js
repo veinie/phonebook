@@ -16,20 +16,20 @@ const customLogger = (req, res, next) => {
     }
 }
 
-const errorHandler = (error, request, response, next) =>{
+const errorHandler = (error, request, response, next) => {
     console.log(error.message)
 
     if (error.name === 'CastError') {
-        return response.status(400).send({error: 'malformatted id'})
+        return response.status(400).send({ error: 'malformatted id' })
     } else if (error.name === 'ValidationError') {
-        return response.status(400).json({error: error.message})
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)
 }
 
 const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: 'unknown endpoint'})
+    response.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(express.json())
@@ -66,30 +66,30 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndRemove(request.params.id)
-        .then(result => {
+        .then(() => {
             response.status(204).end()
         })
         .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response, next) => {
-    const {name, number} = request.body
-    const person = new Person({name, number})
+    const { name, number } = request.body
+    const person = new Person({ name, number })
     person.save()
-        .then(result => {
+        .then(() => {
             console.log(`added ${person.name} ${person.number} to phonebook`)
-            response.json(person)        
+            response.json(person)
         })
         .catch(error => next(error))
     morgan.token('body', request => JSON.stringify(request.body))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-    const {name, number} = request.body
+    const { name, number } = request.body
     Person.findByIdAndUpdate(
         request.params.id,
-        {name, number},
-        {new: true, runValidators: true, context: 'query'}
+        { name, number },
+        { new: true, runValidators: true, context: 'query' }
     )
         .then(updatedPerson => {
             response.json(updatedPerson)

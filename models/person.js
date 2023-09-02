@@ -7,10 +7,10 @@ const url = process.env.MONGODB_URI
 console.log('connecting to MongoDB Atlas Database')
 
 mongoose.connect(url)
-    .then(result => {
+    .then(() => {
         console.log('connected to MongoDB')
     })
-    .catch((error) =>{
+    .catch((error) => {
         console.log('error connecting to MongoDB:', error.message)
     })
 
