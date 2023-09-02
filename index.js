@@ -16,20 +16,29 @@ const customLogger = (req, res, next) => {
     }
 }
 
+const errorHandler = (error, request, response, next) =>{
+    console.log(error.message)
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({error: 'malformatted id'})
+    }
+
+    next(error)
+}
+
 app.use(express.json())
 app.use(express.static('dist'))
 app.use(cors())
 app.use(customLogger)
 
 
-
-
-// app.get('/info', (request, response) => {
-//     const personsLength = persons.length
-//     const timeOfResponse = new Date()
-
-//     response.send(`<p>Phonebook has info for ${personsLength} people<br>${timeOfResponse}</p>`)
-// })
+app.get('/info', (request, response, next) => {
+    Person.find({})
+        .then(persons => {
+            response.send(`Phonebook has info for ${persons.length} people. ${new Date()}`)
+        })
+        .catch(error => next(error))
+})
 
 app.get('/api/persons/', (request, response) => {
     Person.find({}).then(persons => {
@@ -37,45 +46,58 @@ app.get('/api/persons/', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-
-    if (person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                response.json(person)
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
-
     if (!body.name || !body.number) {
         return response.status(400).json({
             error: 'name and number must be included'
         })
     }
-
     const person = new Person({
         name: body.name,
         number: body.number
     })
-
     person.save().then(result => {
         console.log(`added ${person.name} ${person.number} to phonebook`)        
     })
-
     response.json(person)
     morgan.token('body', request => JSON.stringify(request.body))
 })
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+    Person.findByIdAndUpdate(request.params.id, person, {new: true})
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
+})
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
